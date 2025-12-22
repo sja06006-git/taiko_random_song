@@ -1,4 +1,4 @@
-import songDataRaw from '../data/2025-9-8.json';
+import songDataRaw from '../data/songs.json';
 
 export interface CourseInfo {
     level: number;
