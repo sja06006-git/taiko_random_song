@@ -7,13 +7,14 @@ import { filterSongs, pickRandomSong } from './utils/songData';
 
 const INITIAL_FILTERS: FilterCriteria = {
   genres: [],
-  difficulty: 'oni',
+  difficulties: ['oni'],
   levels: [10]
 };
 
 function App() {
   const [filters, setFilters] = useState<FilterCriteria>(INITIAL_FILTERS);
   const [selectedSong, setSelectedSong] = useState<any | null>(null);
+  const [displayDifficulty, setDisplayDifficulty] = useState<any>('oni');
 
   // Derive filtered songs
   const filteredSongs = useMemo(() => {
@@ -22,6 +23,24 @@ function App() {
 
   const handlePick = () => {
     const song = pickRandomSong(filteredSongs);
+    if (song) {
+      // Determine which of the selected difficulties is valid for this song
+      const validDifficulties = filters.difficulties.filter(diff => {
+        const course = song.courses[diff];
+        if (!course) return false;
+        // Also check if this specific difficulty meets level requirements
+        if (filters.levels.length > 0) {
+          return filters.levels.includes(course.level);
+        }
+        return true;
+      });
+
+      // Randomly pick one valid difficulty to display
+      if (validDifficulties.length > 0) {
+        const randomDiff = validDifficulties[Math.floor(Math.random() * validDifficulties.length)];
+        setDisplayDifficulty(randomDiff);
+      }
+    }
     setSelectedSong(song);
   };
 
@@ -51,7 +70,7 @@ function App() {
         {selectedSong && (
           <SongCard
             song={selectedSong}
-            difficulty={filters.difficulty}
+            difficulty={displayDifficulty}
           />
         )}
       </main>

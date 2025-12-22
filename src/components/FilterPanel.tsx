@@ -20,8 +20,32 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChang
         onFilterChange({ ...filters, genres: newGenres });
     };
 
-    const handleDifficultyChange = (difficulty: Difficulty) => {
-        onFilterChange({ ...filters, difficulty });
+    const handleDifficultyChange = (diff: Difficulty) => {
+        let newDifficulties: Difficulty[] = [];
+        const current = filters.difficulties || [];
+
+        if (['oni', 'ura'].includes(diff)) {
+            // Check if we are currently in "Oni/Ura mode" (only oni or ura selected)
+            const isMultiMode = current.every(d => ['oni', 'ura'].includes(d));
+
+            if (isMultiMode) {
+                if (current.includes(diff)) {
+                    // Toggle off, but prevent empty if desired (optional, currently allowing empty)
+                    newDifficulties = current.filter(d => d !== diff);
+                } else {
+                    // Add
+                    newDifficulties = [...current, diff];
+                }
+            } else {
+                // Switch from other mode to this
+                newDifficulties = [diff];
+            }
+        } else {
+            // Strict single select for others
+            newDifficulties = [diff];
+        }
+
+        onFilterChange({ ...filters, difficulties: newDifficulties });
     };
 
     const handleLevelToggle = (level: number) => {
@@ -41,8 +65,8 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChang
                     {DIFFICULTIES.map(diff => (
                         <button
                             key={diff}
-                            className={`px-4 py-2 rounded-full font-bold text-white transition-all duration-200 
-                                ${filters.difficulty === diff
+                            className={`px-4 py-2 rounded-full font-bold text-white transition-all duration-200
+                                ${(filters.difficulties || []).includes(diff)
                                     ? 'opacity-100 transform scale-105 ring-2 ring-white/30'
                                     : 'opacity-60 hover:opacity-80'}
                                 ${diff === 'easy' ? 'bg-red-400' : ''}
