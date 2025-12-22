@@ -20,7 +20,7 @@ export const SongCard: React.FC<SongCardProps> = ({ song, difficulty }) => {
         ura: 'border-purple-500'
     };
 
-    const isUra = difficulty === 'ura';
+    //const isUra = difficulty === 'ura';
 
     return (
         <div className={`
