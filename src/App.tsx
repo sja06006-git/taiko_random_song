@@ -8,8 +8,7 @@ import { filterSongs, pickRandomSong } from './utils/songData';
 const INITIAL_FILTERS: FilterCriteria = {
   genres: [],
   difficulty: 'oni',
-  levelMin: 1,
-  levelMax: 10
+  levels: [10]
 };
 
 function App() {

@@ -50,8 +50,7 @@ export type Difficulty = 'easy' | 'normal' | 'hard' | 'oni' | 'ura';
 export interface FilterCriteria {
     genres: string[];
     difficulty: Difficulty;
-    levelMin?: number;
-    levelMax?: number;
+    levels: number[];
 }
 
 // Cast the raw data to the Song array interface
@@ -84,9 +83,20 @@ export const filterSongs = (criteria: FilterCriteria): Song[] => {
         const course = song.courses[criteria.difficulty];
         if (!course) return false;
 
-        // 3. Level Range Filter
-        if (criteria.levelMin !== undefined && course.level < criteria.levelMin) return false;
-        if (criteria.levelMax !== undefined && course.level > criteria.levelMax) return false;
+        // 3. Level Filter (Multi-select)
+        // If levels array is empty, we might typically show all, but here we require strict selection.
+        // Actually, let's say if empty, show nothing? Or show all?
+        // The prompt says "default level 10 checked", implying usage of specific checks.
+        // Let's ensure strict checking: if course.level is not in criteria.levels, return false.
+        if (criteria.levels.length > 0) {
+            if (!criteria.levels.includes(course.level)) return false;
+        } else {
+            // If no levels selected, logically no songs match specific level criteria. 
+            // But usually in UI if nothing selected implies "All". 
+            // However, user asked for "level 10 checked by default", so "nothing selected" might mean nothing.
+            // Let's assume strict filtering.
+            return false;
+        }
 
         // 4. Deleted Filter
         if (song.isDeleted === 1) return false;

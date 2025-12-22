@@ -38,11 +38,11 @@ export const SongCard: React.FC<SongCardProps> = ({ song, difficulty }) => {
             </div>
 
             <h2 className="text-3xl font-bold leading-tight mb-2 text-zinc-900 break-keep" title={song.title}>
-                {song.titleKo || song.title}
+                {song.title}
             </h2>
 
             {song.titleKo && song.title !== song.titleKo && (
-                <div className="text-sm text-gray-500 mb-4">{song.title}</div>
+                <div className="text-sm text-gray-500 mb-4">{song.titleKo}</div>
             )}
 
             <div className="flex flex-col gap-1 text-sm text-gray-600 mb-6">

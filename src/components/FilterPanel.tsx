@@ -11,6 +11,7 @@ const DIFFICULTIES: Difficulty[] = ['easy', 'normal', 'hard', 'oni', 'ura'];
 
 export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange }) => {
     const allGenres = getAllGenres();
+    const [isLevelOpen, setIsLevelOpen] = React.useState(true); // Default open to show selection
 
     const handleGenreChange = (genre: string) => {
         const newGenres = filters.genres.includes(genre)
@@ -23,19 +24,20 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChang
         onFilterChange({ ...filters, difficulty });
     };
 
-    const handleLevelChange = (type: 'min' | 'max', value: string) => {
-        const numVal = parseInt(value) || 1;
-        onFilterChange({
-            ...filters,
-            [type === 'min' ? 'levelMin' : 'levelMax']: numVal
-        });
+    const handleLevelToggle = (level: number) => {
+        const currentLevels = filters.levels || [];
+        const newLevels = currentLevels.includes(level)
+            ? currentLevels.filter(l => l !== level)
+            : [...currentLevels, level].sort((a, b) => a - b);
+
+        onFilterChange({ ...filters, levels: newLevels });
     };
 
     return (
-        <div className="bg-zinc-800 p-6 rounded-xl mb-8 shadow-lg text-left md:p-4">
+        <div className="bg-zinc-800 p-6 rounded-xl mb-8 shadow-lg text-center md:p-4">
             <div className="mb-6 border-b border-zinc-700 pb-2">
-                <h3 className="text-lg text-gray-200 mb-3 font-semibold">Difficulty</h3>
-                <div className="flex flex-wrap gap-2 justify-start md:justify-center">
+                <h3 className="text-lg text-gray-200 mb-3 font-semibold">난이도</h3>
+                <div className="flex flex-wrap gap-2 justify-center">
                     {DIFFICULTIES.map(diff => (
                         <button
                             key={diff}
@@ -58,36 +60,47 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChang
             </div>
 
             <div className="mb-6 border-b border-zinc-700 pb-2">
-                <h3 className="text-lg text-gray-200 mb-3 font-semibold">Level Range</h3>
-                <div className="flex items-center gap-2">
-                    <input
-                        type="number"
-                        min="1"
-                        max="10"
-                        className="p-2 bg-zinc-700 border border-zinc-600 rounded text-white text-center w-20 md:w-full md:text-base"
-                        value={filters.levelMin ?? 1}
-                        onChange={(e) => handleLevelChange('min', e.target.value)}
-                    />
-                    <span className="text-gray-400">~</span>
-                    <input
-                        type="number"
-                        min="1"
-                        max="10"
-                        className="p-2 bg-zinc-700 border border-zinc-600 rounded text-white text-center w-20 md:w-full md:text-base"
-                        value={filters.levelMax ?? 10}
-                        onChange={(e) => handleLevelChange('max', e.target.value)}
-                    />
-                </div>
+                <button
+                    onClick={() => setIsLevelOpen(!isLevelOpen)}
+                    className="w-full flex items-center justify-between text-lg text-gray-200 mb-3 font-semibold focus:outline-none"
+                >
+                    <span>레벨 ({filters.levels.length > 0 ? filters.levels.join(', ') : '선택 안함'})</span>
+                    <span className="text-sm text-gray-400">{isLevelOpen ? '▲' : '▼'}</span>
+                </button>
+
+                {isLevelOpen && (
+                    <div className="grid grid-cols-5 gap-2 justify-items-center mb-4 animate-slide-down">
+                        {Array.from({ length: 10 }, (_, i) => i + 1).map(num => (
+                            <label
+                                key={num}
+                                className={`
+                                    flex items-center justify-center cursor-pointer w-full py-2 rounded-lg font-bold text-sm transition-colors border
+                                    ${filters.levels.includes(num)
+                                        ? 'bg-zinc-600 border-zinc-500 text-white shadow-inner'
+                                        : 'bg-zinc-800 border-zinc-700 text-gray-500 hover:bg-zinc-700'}
+                                `}
+                            >
+                                <input
+                                    type="checkbox"
+                                    className="hidden"
+                                    checked={filters.levels.includes(num)}
+                                    onChange={() => handleLevelToggle(num)}
+                                />
+                                {num}
+                            </label>
+                        ))}
+                    </div>
+                )}
             </div>
 
             <div>
-                <h3 className="text-lg text-gray-200 mb-3 font-semibold">Genres</h3>
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-2 md:grid-cols-2 lg:grid-cols-3">
+                <h3 className="text-lg text-gray-200 mb-3 font-semibold">장르</h3>
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-2 md:grid-cols-2 lg:grid-cols-3 justify-items-center">
                     {allGenres.map(genre => (
                         <label
                             key={genre}
-                            className={`flex items-center cursor-pointer p-2 rounded-lg transition-colors select-none text-sm
-                                ${filters.genres.includes(genre) ? 'bg-zinc-700' : 'hover:bg-zinc-700/50'}
+                            className={`flex items-center justify-center cursor-pointer p-2 rounded-lg transition-colors select-none text-sm w-full font-bold
+                                ${filters.genres.includes(genre) ? 'bg-zinc-600 text-white' : 'bg-zinc-700/50 text-gray-200 hover:bg-zinc-700 hover:text-white'}
                             `}
                         >
                             <input
