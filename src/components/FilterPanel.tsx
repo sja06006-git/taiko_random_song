@@ -138,6 +138,39 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChang
                     ))}
                 </div>
             </div>
+
+            <div className="mt-8 border-t border-zinc-700 pt-6">
+                <h3 className="text-lg text-gray-200 mb-3 font-semibold">기타 옵션</h3>
+                <div className="flex flex-wrap gap-4 justify-center">
+                    <label className="flex items-center cursor-pointer text-gray-200 hover:text-white transition-colors select-none">
+                        <input
+                            type="checkbox"
+                            className="mr-2 w-5 h-5 accent-red-500 rounded focus:ring-red-500"
+                            checked={filters.excludeNonNAC}
+                            onChange={(e) => onFilterChange({ ...filters, excludeNonNAC: e.target.checked })}
+                        />
+                        <span className="font-bold">아케이드 미수록 제외</span>
+                    </label>
+                    <label className="flex items-center cursor-pointer text-gray-200 hover:text-white transition-colors select-none">
+                        <input
+                            type="checkbox"
+                            className="mr-2 w-5 h-5 accent-red-500 rounded focus:ring-red-500"
+                            checked={filters.excludeKrBanned}
+                            onChange={(e) => onFilterChange({ ...filters, excludeKrBanned: e.target.checked })}
+                        />
+                        <span className="font-bold">한국 미수록 제외</span>
+                    </label>
+                    <label className="flex items-center cursor-pointer text-gray-200 hover:text-white transition-colors select-none">
+                        <input
+                            type="checkbox"
+                            className="mr-2 w-5 h-5 accent-red-500 rounded focus:ring-red-500"
+                            checked={filters.excludeAsiaBanned}
+                            onChange={(e) => onFilterChange({ ...filters, excludeAsiaBanned: e.target.checked })}
+                        />
+                        <span className="font-bold">아시아 미수록 제외</span>
+                    </label>
+                </div>
+            </div>
         </div>
     );
 };

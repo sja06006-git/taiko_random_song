@@ -8,7 +8,10 @@ import { filterSongs, pickRandomSong } from './utils/songData';
 const INITIAL_FILTERS: FilterCriteria = {
   genres: [],
   difficulties: ['oni'],
-  levels: [10]
+  levels: [10],
+  excludeNonNAC: true,
+  excludeAsiaBanned: true,
+  excludeKrBanned: true
 };
 
 function App() {

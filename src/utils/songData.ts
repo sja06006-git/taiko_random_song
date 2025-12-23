@@ -51,6 +51,9 @@ export interface FilterCriteria {
     genres: string[];
     difficulties: Difficulty[];
     levels: number[];
+    excludeNonNAC: boolean;
+    excludeAsiaBanned: boolean;
+    excludeKrBanned: boolean;
 }
 
 // Cast the raw data to the Song array interface
@@ -94,7 +97,12 @@ export const filterSongs = (criteria: FilterCriteria): Song[] => {
 
         if (!hasValidDifficulty) return false;
 
-        // 3. Deleted Filter
+        // 3. Advanced Filters (Exclusion Logic)
+        if (criteria.excludeNonNAC && !song.version.includes('NAC')) return false;
+        if (criteria.excludeAsiaBanned && song.isAsiaBanned === 1) return false;
+        if (criteria.excludeKrBanned && song.isKrBanned === 1) return false;
+
+        // 4. Deleted Filter
         if (song.isDeleted === 1) return false;
 
         return true;
