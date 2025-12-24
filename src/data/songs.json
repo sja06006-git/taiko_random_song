@@ -439,7 +439,7 @@
     "version": [
       "NAC"
     ],
-    "isAsiaBanned": 1,
+    "isAsiaBanned": 0,
     "isKrBanned": 0,
     "genre": [
       "kids"
@@ -552,7 +552,7 @@
     "version": [
       "NAC"
     ],
-    "isAsiaBanned": 1,
+    "isAsiaBanned": 0,
     "isKrBanned": 0,
     "genre": [
       "pops",
@@ -676,7 +676,7 @@
     "version": [
       "NAC"
     ],
-    "isAsiaBanned": 1,
+    "isAsiaBanned": 0,
     "isKrBanned": 0,
     "genre": [
       "anime"
@@ -819,7 +819,7 @@
     "version": [
       "NAC"
     ],
-    "isAsiaBanned": 1,
+    "isAsiaBanned": 0,
     "isKrBanned": 0,
     "genre": [
       "vocaloid"
@@ -1427,7 +1427,7 @@
       "DF",
       "NS2"
     ],
-    "isAsiaBanned": 1,
+    "isAsiaBanned": 0,
     "isKrBanned": 0,
     "genre": [
       "pops"
@@ -2199,7 +2199,7 @@
       "NAC",
       "NS2"
     ],
-    "isAsiaBanned": 1,
+    "isAsiaBanned": 0,
     "isKrBanned": 0,
     "genre": [
       "pops"
@@ -2329,7 +2329,7 @@
     "version": [
       "NAC"
     ],
-    "isAsiaBanned": 1,
+    "isAsiaBanned": 0,
     "isKrBanned": 0,
     "genre": [
       "pops"
@@ -3595,7 +3595,7 @@
     "version": [
       "NAC"
     ],
-    "isAsiaBanned": 1,
+    "isAsiaBanned": 0,
     "isKrBanned": 0,
     "genre": [
       "anime",
@@ -3704,7 +3704,7 @@
     "version": [
       "NAC"
     ],
-    "isAsiaBanned": 1,
+    "isAsiaBanned": 0,
     "isKrBanned": 0,
     "genre": [
       "anime"
@@ -3830,7 +3830,7 @@
     "version": [
       "NAC"
     ],
-    "isAsiaBanned": 1,
+    "isAsiaBanned": 0,
     "isKrBanned": 0,
     "genre": [
       "pops"
@@ -3940,7 +3940,7 @@
     "version": [
       "NAC"
     ],
-    "isAsiaBanned": 1,
+    "isAsiaBanned": 0,
     "isKrBanned": 0,
     "genre": [
       "pops"
@@ -7367,7 +7367,7 @@
       "DF",
       "NS2"
     ],
-    "isAsiaBanned": 1,
+    "isAsiaBanned": 0,
     "isKrBanned": 0,
     "genre": [
       "pops"
@@ -12674,7 +12674,7 @@
       "DF",
       "NS2"
     ],
-    "isAsiaBanned": 1,
+    "isAsiaBanned": 0,
     "isKrBanned": 0,
     "genre": [
       "pops"
