@@ -9,7 +9,11 @@ export interface CourseInfo {
     rollTime: number[];
     maxDensity: number;
     daniUsed: number;
-    dani: string[];
+    dani: Array<{
+        version: string;
+        dan: string;
+        order: number;
+    }>;
     images: string[];
 }
 
@@ -116,4 +120,69 @@ export const pickRandomSong = (filteredSongs: Song[]): Song | null => {
     if (filteredSongs.length === 0) return null;
     const randomIndex = Math.floor(Math.random() * filteredSongs.length);
     return filteredSongs[randomIndex];
+};
+
+// --- Quiz Helper Types & Functions ---
+
+export interface DaniData {
+    version: string;
+    dan: string;
+    songs: Array<{
+        song: Song;
+        order: number;
+        difficulty: Difficulty;
+    }>;
+}
+
+/**
+ * Parses all songs to build a structured list of Dani (Class) courses.
+ * Grouped by Version and Dan.
+ */
+export const getDaniCourses = (): DaniData[] => {
+    const daniMap = new Map<string, DaniData>();
+
+    songs.forEach(song => {
+        // Iterate through all difficulties to find Dani info
+        (['easy', 'normal', 'hard', 'oni', 'ura'] as Difficulty[]).forEach(diff => {
+            const course = song.courses[diff];
+            if (course && course.daniUsed === 1 && course.dani && course.dani.length > 0) {
+                course.dani.forEach(d => {
+                    const key = `${d.version}-${d.dan}`;
+                    if (!daniMap.has(key)) {
+                        daniMap.set(key, {
+                            version: d.version,
+                            dan: d.dan,
+                            songs: []
+                        });
+                    }
+                    daniMap.get(key)!.songs.push({
+                        song: song,
+                        order: d.order,
+                        difficulty: diff
+                    });
+                });
+            }
+        });
+    });
+
+    // Sort songs within each dan by order
+    const result: DaniData[] = [];
+    daniMap.forEach(value => {
+        value.songs.sort((a, b) => a.order - b.order);
+        // Only include if we have exactly 3 songs (standard for recent Taiko)
+        // or just include all. Most valid tests have 3.
+        if (value.songs.length === 3) {
+            result.push(value);
+        }
+    });
+
+    return result;
+};
+
+/**
+ * Get a random set of generic songs for standard quizzes
+ */
+export const getRandomSongs = (count: number): Song[] => {
+    const shuffled = [...songs].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
 };
