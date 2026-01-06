@@ -176,7 +176,7 @@ export const getDaniCourses = (): DaniData[] => {
 };
 
 const DANI_VERSION_ORDER = [
-  'katsudon', 'sorairo', 'momoiro', 'kimidori', 'Murasaki', 
+  'katsudon', 'sorairo', 'momoiro', 'kimidori', 'murasaki', 
   'white', 'red', 'yellow', 'blue', 'green'
 ];
 

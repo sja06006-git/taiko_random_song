@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { FilterPanel } from '../components/FilterPanel';
 import { SongCard } from '../components/SongCard';
 import { RandomPicker } from '../components/RandomPicker';
@@ -49,6 +50,11 @@ export function RandomSongPage() {
 
   return (
     <div className="max-w-4xl mx-auto p-8 md:p-4 text-center min-h-screen box-border">
+      <div className="text-left mb-4">
+        <Link to="/" className="text-gray-500 hover:text-white flex items-center gap-2">
+           ← 홈으로 돌아가기
+        </Link>
+      </div>
       <header className="mb-8">
         <h1 className="text-4xl md:text-3xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-amber-500">
           Taiko Random Song
