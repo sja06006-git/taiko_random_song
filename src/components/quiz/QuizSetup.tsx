@@ -77,39 +77,41 @@ export function QuizSetup({ mode, onStart, onCancel }: QuizSetupProps) {
                 <span className="text-gray-300 font-bold">⚠️ 난이도는 <span className="text-pink-500">오니(Oni)</span>와 <span className="text-purple-500">우라(Ura)</span>로 고정됩니다.</span>
             </div>
 
-            {/* Level Range */}
-            <div>
-                <h3 className="text-xl text-gray-200 font-bold mb-4">레벨 범위 설정</h3>
-                <div className="flex items-center gap-4 justify-center bg-zinc-900 p-6 rounded-xl border border-zinc-700">
-                    <select 
-                        value={levelMin} 
-                        onChange={(e) => {
-                            const v = Number(e.target.value);
-                            setLevelMin(v);
-                            if (v > levelMax) setLevelMax(v);
-                        }}
-                        className="bg-zinc-800 text-white p-3 rounded-lg border border-zinc-600 text-xl font-bold outline-none focus:border-purple-500"
-                    >
-                        {Array.from({length: 10}, (_, i) => i + 1).map(n => (
-                            <option key={n} value={n}>★ {n}</option>
-                        ))}
-                    </select>
-                    <span className="text-gray-400 font-bold text-xl">~</span>
-                    <select 
-                        value={levelMax} 
-                        onChange={(e) => {
-                            const v = Number(e.target.value);
-                            setLevelMax(v);
-                            if (v < levelMin) setLevelMin(v);
-                        }}
-                        className="bg-zinc-800 text-white p-3 rounded-lg border border-zinc-600 text-xl font-bold outline-none focus:border-purple-500"
-                    >
-                        {Array.from({length: 10}, (_, i) => i + 1).map(n => (
-                            <option key={n} value={n}>★ {n}</option>
-                        ))}
-                    </select>
+            {/* Level Range - Hide for Level Quiz */}
+            {mode !== 'level' && (
+                <div>
+                    <h3 className="text-xl text-gray-200 font-bold mb-4">레벨 범위 설정</h3>
+                    <div className="flex items-center gap-4 justify-center bg-zinc-900 p-6 rounded-xl border border-zinc-700">
+                        <select 
+                            value={levelMin} 
+                            onChange={(e) => {
+                                const v = Number(e.target.value);
+                                setLevelMin(v);
+                                if (v > levelMax) setLevelMax(v);
+                            }}
+                            className="bg-zinc-800 text-white p-3 rounded-lg border border-zinc-600 text-xl font-bold outline-none focus:border-purple-500"
+                        >
+                            {Array.from({length: 10}, (_, i) => i + 1).map(n => (
+                                <option key={n} value={n}>★ {n}</option>
+                            ))}
+                        </select>
+                        <span className="text-gray-400 font-bold text-xl">~</span>
+                        <select 
+                            value={levelMax} 
+                            onChange={(e) => {
+                                const v = Number(e.target.value);
+                                setLevelMax(v);
+                                if (v < levelMin) setLevelMin(v);
+                            }}
+                            className="bg-zinc-800 text-white p-3 rounded-lg border border-zinc-600 text-xl font-bold outline-none focus:border-purple-500"
+                        >
+                            {Array.from({length: 10}, (_, i) => i + 1).map(n => (
+                                <option key={n} value={n}>★ {n}</option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* Genre Selection */}
             <div>

@@ -175,12 +175,63 @@ export const getDaniCourses = (): DaniData[] => {
     return result;
 };
 
+const DANI_VERSION_ORDER = [
+  'katsudon', 'sorairo', 'momoiro', 'kimidori', 'Murasaki', 
+  'white', 'red', 'yellow', 'blue', 'green'
+];
+
 export const getAvailableDaniVersions = (daniList: DaniData[]): string[] => {
-    return Array.from(new Set(daniList.map(d => d.version))).sort();
+    const versions = Array.from(new Set(daniList.map(d => d.version)));
+    
+    return versions.sort((a, b) => {
+        const indexA = DANI_VERSION_ORDER.indexOf(a);
+        const indexB = DANI_VERSION_ORDER.indexOf(b);
+
+        // 1. Both are named versions -> Sort by defined order
+        if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+
+        // 2. Only A is named -> A comes first
+        if (indexA !== -1) return -1;
+        
+        // 3. Only B is named -> B comes first
+        if (indexB !== -1) return 1;
+
+        // 4. Both are not in the list (likely numeric strings like "2020", "25", etc. or other names)
+        // Try to sort numerically if possible, otherwise alphabetically
+        const numA = parseInt(a);
+        const numB = parseInt(b);
+
+        if (!isNaN(numA) && !isNaN(numB)) {
+            return numA - numB;
+        }
+
+        return a.localeCompare(b);
+    });
 };
 
+const DAN_ORDER = [
+  '5kyu', '4kyu', '3kyu', '2kyu', '1kyu',
+  '1dan', '2dan', '3dan', '4dan', '5dan', '6dan', '7dan', '8dan', '9dan', '10dan',
+  'kuroto', 'mejin', 'chojin', 'tatsujin'
+];
+
 export const getAvailableDans = (daniList: DaniData[], version: string): string[] => {
-    return Array.from(new Set(daniList.filter(d => d.version === version).map(d => d.dan))); // sorting might be needed but dan names are strings like '1kyu', '1dan'.. hard to sort naturally without map
+    const dans = Array.from(new Set(daniList.filter(d => d.version === version).map(d => d.dan)));
+    return dans.sort((a, b) => {
+        const indexA = DAN_ORDER.indexOf(a);
+        const indexB = DAN_ORDER.indexOf(b);
+        
+        // If both in list, sort by index
+        if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+        
+        // If only A is in list, A comes first
+        if (indexA !== -1) return -1;
+        // If only B is in list, B comes first
+        if (indexB !== -1) return 1;
+        
+        // If neither, alphabetical
+        return a.localeCompare(b);
+    });
 };
 
 /**
