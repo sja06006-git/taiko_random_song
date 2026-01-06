@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { type Difficulty, type DaniData, getDaniCourses, getRandomSongs } from '../../utils/songData';
+import { type Difficulty, type DaniData, getDaniCourses, songs as allSongs } from '../../utils/songData';
 
 export type QuizMode = 
   | 'title'       // Hint -> Title
@@ -9,8 +9,11 @@ export type QuizMode =
   | 'dani_order'  // Dani -> 3 Songs Order
   | 'dani_year';  // Song -> Dani + Year
 
+import { type QuizFilters } from './QuizSetup';
+
 interface QuizGameProps {
   mode: QuizMode;
+  filters: QuizFilters;
   onExit: () => void;
 }
 
@@ -24,7 +27,7 @@ interface Question {
 
 const QUESTIONS_PER_ROUND = 10;
 
-export function QuizGame({ mode, onExit }: QuizGameProps) {
+export function QuizGame({ mode, filters, onExit }: QuizGameProps) {
   const [score, setScore] = useState(0);
   const [round, setRound] = useState(1);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
@@ -33,7 +36,39 @@ export function QuizGame({ mode, onExit }: QuizGameProps) {
   const [isGameOver, setIsGameOver] = useState(false);
   
   // Memoize Dani data to avoid recalculating every render
-  const daniData = useMemo(() => getDaniCourses(), []);
+  const daniData = useMemo(() => {
+    let data = getDaniCourses();
+    // Filter Dani Data
+    if (filters.daniVersion) {
+        data = data.filter(d => d.version === filters.daniVersion);
+    }
+    if (filters.daniDans.length > 0) {
+        data = data.filter(d => filters.daniDans.includes(d.dan));
+    }
+    return data;
+  }, [filters.daniVersion, filters.daniDans]);
+
+  // Filtered Songs for Standard Modes
+  // Only Oni/Ura are allowed as per requirement
+  const filteredStandardSongs = useMemo(() => {
+      return allSongs.filter(song => {
+            // Genre Filter
+            if (filters.genres.length > 0) {
+                if (!song.genre.some(g => filters.genres.includes(g))) return false;
+            }
+            
+            // Level Filter (Must have at least one Oni/Ura course in range)
+            const oni = song.courses['oni'];
+            const ura = song.courses['ura'];
+            
+            let hasValidCourse = false;
+            if (oni && oni.level >= filters.levelRange.min && oni.level <= filters.levelRange.max) hasValidCourse = true;
+            if (ura && ura.level >= filters.levelRange.min && ura.level <= filters.levelRange.max) hasValidCourse = true;
+
+            return hasValidCourse;
+      });
+  }, [filters.genres, filters.levelRange]);
+
 
   const generateQuestion = (): Question => {
     switch (mode) {
@@ -49,8 +84,19 @@ export function QuizGame({ mode, onExit }: QuizGameProps) {
 
   // --- Quiz Generators ---
 
+  // Helper to get random songs from the filtered list
+  const getFilteredRandomSongs = (count: number): any[] => {
+      const candidates = [...filteredStandardSongs].sort(() => Math.random() - 0.5);
+      // Fallback if not enough songs: just take what we have, or fill with randoms (but that breaks filter rules)
+      // Ideally we should warn if 0 songs. For now, if 0, we might crash or handle gracefully.
+      if (candidates.length === 0) return []; 
+      return candidates.slice(0, count);
+  };
+
   const generateTitleQuiz = (): Question => {
-    const candidates = getRandomSongs(4);
+    const candidates = getFilteredRandomSongs(4);
+    if (candidates.length === 0) return { questionText: "조건에 맞는 곡이 없습니다.", options: [], correctIndex: -1 };
+
     const correct = candidates[0];
     const options = candidates.sort(() => Math.random() - 0.5).map(s => s.title);
     
@@ -80,21 +126,27 @@ export function QuizGame({ mode, onExit }: QuizGameProps) {
   };
 
   const generateComboQuiz = (): Question => {
-    const song = getRandomSongs(1)[0];
-    // Pick Oni or Ura
-    const diffs: Difficulty[] = ['oni', 'ura'];
-    const validDiffs = diffs.filter(d => song.courses[d]);
-    const targetDiff = validDiffs[Math.floor(Math.random() * validDiffs.length)] || 'oni';
-    const targetCourse = song.courses[targetDiff];
+    const pool = getFilteredRandomSongs(1);
+    if (pool.length === 0) return { questionText: "조건에 맞는 곡이 없습니다.", options: [], correctIndex: -1 };
+    const song = pool[0];
 
-    if (!targetCourse) {
-        // Fallback retry if something is weird
-        return generateComboQuiz();
-    }
+    // Pick Oni or Ura (Only these are allowed in filter)
+    const diffs: Difficulty[] = ['oni', 'ura'];
+    const validDiffs = diffs.filter(d => {
+        const c = song.courses[d];
+        // Must match level range too
+        if (!c) return false;
+        return c.level >= filters.levelRange.min && c.level <= filters.levelRange.max;
+    });
+
+    if (validDiffs.length === 0) return generateComboQuiz(); // Retry or fail
+
+    const targetDiff = validDiffs[Math.floor(Math.random() * validDiffs.length)];
+    const targetCourse = song.courses[targetDiff]!;
 
     const correctCombo = targetCourse.maxCombo;
     
-    // Generate wrong options (random close numbers)
+    // Generate wrong options
     const wrongOptions = new Set<number>();
     while (wrongOptions.size < 3) {
         const offset = Math.floor(Math.random() * 100) - 50;
@@ -114,14 +166,13 @@ export function QuizGame({ mode, onExit }: QuizGameProps) {
   };
 
   const generateBpmQuiz = (): Question => {
-      const song = getRandomSongs(1)[0];
+      const pool = getFilteredRandomSongs(1);
+      if (pool.length === 0) return { questionText: "조건에 맞는 곡이 없습니다.", options: [], correctIndex: -1 };
+      const song = pool[0];
+
       const displayCorrect = song.bpm.min === song.bpm.max ? `${song.bpm.min}` : `${song.bpm.min}-${song.bpm.max}`;
 
-      // Generate wrong options
-      // Let's simplify: Correct answer is the actual BPM string. Wrong answers are faked BPMs.
-      
       const optionsArr = [displayCorrect];
-      // Add fake options
       while (optionsArr.length < 4) {
           const base = song.bpm.max;
           const offset = Math.floor(Math.random() * 60) - 30;
@@ -140,16 +191,24 @@ export function QuizGame({ mode, onExit }: QuizGameProps) {
   };
 
   const generateLevelQuiz = (): Question => {
-      const song = getRandomSongs(1)[0];
-      // Pick a difficulty that exists
-      const niceDiffs: Difficulty[] = ['hard', 'oni', 'ura'];
-      const validDiffs = niceDiffs.filter(d => song.courses[d]);
-      if (validDiffs.length === 0) return generateLevelQuiz(); // Retry
+      const pool = getFilteredRandomSongs(1);
+      if (pool.length === 0) return { questionText: "조건에 맞는 곡이 없습니다.", options: [], correctIndex: -1 };
+      const song = pool[0];
+
+      // Pick valid diff (Oni/Ura + Level Range)
+      const diffs: Difficulty[] = ['oni', 'ura'];
+      const validDiffs = diffs.filter(d => {
+          const c = song.courses[d];
+          if (!c) return false;
+          return c.level >= filters.levelRange.min && c.level <= filters.levelRange.max;
+      });
+
+      if (validDiffs.length === 0) return generateLevelQuiz();
 
       const targetDiff = validDiffs[Math.floor(Math.random() * validDiffs.length)];
       const correctLevel = song.courses[targetDiff]!.level;
 
-      // Generate wrong options (levels 1-10)
+      // Generate wrong options
       const optionsNum = [correctLevel];
       while (optionsNum.length < 4) {
           const l = Math.floor(Math.random() * 10) + 1;

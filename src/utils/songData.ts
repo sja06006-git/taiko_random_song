@@ -169,14 +169,18 @@ export const getDaniCourses = (): DaniData[] => {
     const result: DaniData[] = [];
     daniMap.forEach(value => {
         value.songs.sort((a, b) => a.order - b.order);
-        // Only include if we have exactly 3 songs (standard for recent Taiko)
-        // or just include all. Most valid tests have 3.
-        if (value.songs.length === 3) {
-            result.push(value);
-        }
+        result.push(value);
     });
 
     return result;
+};
+
+export const getAvailableDaniVersions = (daniList: DaniData[]): string[] => {
+    return Array.from(new Set(daniList.map(d => d.version))).sort();
+};
+
+export const getAvailableDans = (daniList: DaniData[], version: string): string[] => {
+    return Array.from(new Set(daniList.filter(d => d.version === version).map(d => d.dan))); // sorting might be needed but dan names are strings like '1kyu', '1dan'.. hard to sort naturally without map
 };
 
 /**

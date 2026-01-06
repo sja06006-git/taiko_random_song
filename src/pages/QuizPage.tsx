@@ -1,9 +1,28 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { QuizGame, type QuizMode } from '../components/quiz/QuizGame';
+import { QuizSetup, type QuizFilters } from '../components/quiz/QuizSetup';
 
 export function QuizPage() {
   const [selectedMode, setSelectedMode] = useState<QuizMode | null>(null);
+  const [filters, setFilters] = useState<QuizFilters | null>(null);
+  const [inSetup, setInSetup] = useState(false);
+
+  const handleModeSelect = (mode: QuizMode) => {
+      setSelectedMode(mode);
+      setInSetup(true);
+  };
+
+  const handleSetupStart = (selectedFilters: QuizFilters) => {
+      setFilters(selectedFilters);
+      setInSetup(false);
+  };
+
+  const handleExit = () => {
+      setSelectedMode(null);
+      setFilters(null);
+      setInSetup(false);
+  };
 
   const menu = (
     <div className="max-w-4xl mx-auto p-4 md:p-8 text-center min-h-screen box-border flex flex-col items-center">
@@ -24,37 +43,37 @@ export function QuizPage() {
             title="제목 맞추기" 
             desc="장르, 아티스트 힌트 제공" 
             emoji="🎵"
-            onClick={() => setSelectedMode('title')} 
+            onClick={() => handleModeSelect('title')} 
         />
         <MenuButton 
             title="최대 콤보 수 맞추기" 
             desc="노트 수를 맞춰보세요" 
             emoji="💯"
-            onClick={() => setSelectedMode('combo')} 
+            onClick={() => handleModeSelect('combo')} 
         />
         <MenuButton 
             title="BPM 맞추기" 
             desc="곡의 빠르기를 맞춰보세요" 
             emoji="⚡"
-            onClick={() => setSelectedMode('bpm')} 
+            onClick={() => handleModeSelect('bpm')} 
         />
         <MenuButton 
             title="레벨 맞추기" 
             desc="난이도 별 개수 맞추기" 
             emoji="aa"
-            onClick={() => setSelectedMode('level')} 
+            onClick={() => handleModeSelect('level')} 
         />
         <MenuButton 
             title="단위도장 곡 순서" 
             desc="3곡의 순서를 맞춰보세요" 
             emoji="📜"
-            onClick={() => setSelectedMode('dani_order')} 
+            onClick={() => handleModeSelect('dani_order')} 
         />
         <MenuButton 
             title="단위도장 수록 시기" 
             desc="어느 단위에 수록되었을까요?" 
             emoji="🗓️"
-            onClick={() => setSelectedMode('dani_year')} 
+            onClick={() => handleModeSelect('dani_year')} 
         />
       </div>
     </div>
@@ -66,13 +85,21 @@ export function QuizPage() {
         <div className="animate-fade-in pt-8">
              <div className="text-left px-8 mb-4">
                 <button 
-                  onClick={() => setSelectedMode(null)}
+                  onClick={handleExit}
                   className="text-gray-500 hover:text-white flex items-center gap-2"
                 >
                   ← 메뉴로 돌아가기
                 </button>
              </div>
-            <QuizGame mode={selectedMode} onExit={() => setSelectedMode(null)} />
+             {inSetup ? (
+                 <QuizSetup 
+                    mode={selectedMode} 
+                    onStart={handleSetupStart} 
+                    onCancel={() => setSelectedMode(null)} 
+                 />
+             ) : (
+                <QuizGame mode={selectedMode} filters={filters!} onExit={handleExit} />
+             )}
         </div>
       ) : (
         menu
