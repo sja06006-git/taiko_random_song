@@ -212,7 +212,7 @@ export const getAvailableDaniVersions = (daniList: DaniData[]): string[] => {
 const DAN_ORDER = [
   'beginner', '10kyu', '9kyu', '8kyu', '7kyu', '6kyu', '5kyu', '4kyu', '3kyu', '2kyu', '1kyu',
   '1dan', '2dan', '3dan', '4dan', '5dan', '6dan', '7dan', '8dan', '9dan', '10dan',
-  'kuroto', 'mejin', 'chojin', 'tatsujin'
+  'kuroto', 'meijin', 'chojin', 'tatsujin'
 ];
 
 const DAN_DISPLAY_MAP: Record<string, string> = {
@@ -221,7 +221,7 @@ const DAN_DISPLAY_MAP: Record<string, string> = {
   '5kyu': '五級', '4kyu': '四級', '3kyu': '三級', '2kyu': '二級', '1kyu': '一級',
   '1dan': '初段', '2dan': '二段', '3dan': '三段', '4dan': '四段', '5dan': '五段',
   '6dan': '六段', '7dan': '七段', '8dan': '八段', '9dan': '九段', '10dan': '十段',
-  'kuroto': '玄人', 'mejin': '名人', 'chojin': '超人', 'tatsujin': '達人'
+  'kuroto': '玄人', 'meijin': '名人', 'chojin': '超人', 'tatsujin': '達人'
 };
 
 export const getDanDisplayName = (dan: string): string => {
