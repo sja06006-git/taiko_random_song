@@ -2,12 +2,12 @@ import { useState, useEffect, useMemo } from 'react';
 import { type Difficulty, type DaniData, getDaniCourses, songs as allSongs } from '../../utils/songData';
 
 export type QuizMode = 
-  | 'title'       // Hint -> Title
-  | 'combo'       // Title -> Combo
-  | 'bpm'         // Title -> BPM
-  | 'level'       // Title + Diff -> Level
-  | 'dani_order'  // Dani -> 3 Songs Order
-  | 'dani_year';  // Song -> Dani + Year
+  | 'title'       // 힌트 -> 제목
+  | 'combo'       // 제목 -> 콤보
+  | 'bpm'         // 제목 -> BPM
+  | 'level'       // 제목 + 난이도 -> 레벨
+  | 'dani_order'  // 단위 -> 3곡 순서
+  | 'dani_year';  // 노래 -> 단위 + 연도
 
 import { type QuizFilters } from './QuizSetup';
 
@@ -20,9 +20,9 @@ interface QuizGameProps {
 interface Question {
   questionText: React.ReactNode;
   hint?: React.ReactNode;
-  options: string[]; // Text to display on buttons
+  options: string[]; // 버튼에 표시될 텍스트
   correctIndex: number;
-  explanation?: string; // Shown after answering
+  explanation?: string; // 정답 확인 후 표시됨
 }
 
 const QUESTIONS_PER_ROUND = 10;
@@ -35,29 +35,29 @@ export function QuizGame({ mode, filters, onExit }: QuizGameProps) {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [isGameOver, setIsGameOver] = useState(false);
   
-  // Memoize Dani data to avoid recalculating every render
+  // 렌더링마다 재계산하는 것을 방지하기 위해 단위 데이터 메모이제이션
   const daniData = useMemo(() => {
     let data = getDaniCourses();
-    // Filter Dani Data
-    if (filters.daniVersion) {
-        data = data.filter(d => d.version === filters.daniVersion);
+    // 단위 데이터 필터링
+    if (filters.daniVersions.length > 0) {
+        data = data.filter(d => filters.daniVersions.includes(d.version));
     }
     if (filters.daniDans.length > 0) {
         data = data.filter(d => filters.daniDans.includes(d.dan));
     }
     return data;
-  }, [filters.daniVersion, filters.daniDans]);
+  }, [filters.daniVersions, filters.daniDans]);
 
-  // Filtered Songs for Standard Modes
-  // Only Oni/Ura are allowed as per requirement
+  // 일반 모드를 위한 필터링된 노래
+  // 요구사항에 따라 오니/우라만 허용됨
   const filteredStandardSongs = useMemo(() => {
       return allSongs.filter(song => {
-            // Genre Filter
+            // 장르 필터
             if (filters.genres.length > 0) {
                 if (!song.genre.some(g => filters.genres.includes(g))) return false;
             }
             
-            // Level Filter (Must have at least one Oni/Ura course in range)
+            // 레벨 필터 (범위 내에 오니/우라 코스가 적어도 하나 있어야 함)
             const oni = song.courses['oni'];
             const ura = song.courses['ura'];
             
@@ -82,13 +82,13 @@ export function QuizGame({ mode, filters, onExit }: QuizGameProps) {
     }
   };
 
-  // --- Quiz Generators ---
+  // --- 퀴즈 생성기 ---
 
-  // Helper to get random songs from the filtered list
+  // 필터링된 목록에서 무작위 노래를 가져오는 도우미 함수
   const getFilteredRandomSongs = (count: number): any[] => {
       const candidates = [...filteredStandardSongs].sort(() => Math.random() - 0.5);
-      // Fallback if not enough songs: just take what we have, or fill with randoms (but that breaks filter rules)
-      // Ideally we should warn if 0 songs. For now, if 0, we might crash or handle gracefully.
+      // 노래가 충분하지 않은 경우 대비: 가진 것만 가져오거나 무작위로 채움 (하지만 필터 규칙을 위반함)
+      // 이상적으로는 0곡일 때 경고해야 함. 현재는 0곡이면 충돌하거나 우아하게 처리.
       if (candidates.length === 0) return []; 
       return candidates.slice(0, count);
   };
@@ -100,10 +100,10 @@ export function QuizGame({ mode, filters, onExit }: QuizGameProps) {
     const correct = candidates[0];
     const options = candidates.sort(() => Math.random() - 0.5).map(s => s.title);
     
-    // Find index of the correct title in the shuffled options
+    // 섞인 옵션에서 정답 제목의 인덱스 찾기
     const correctIndex = options.indexOf(correct.title);
 
-    // Create Hint (Genre, Artist, etc)
+    // 힌트 생성 (장르, 아티스트 등)
     const hint = (
       <div className="flex flex-col gap-2 text-gray-200">
         <div><span className="text-gray-400">장르:</span> {correct.genre.join(', ')}</div>
@@ -130,16 +130,16 @@ export function QuizGame({ mode, filters, onExit }: QuizGameProps) {
     if (pool.length === 0) return { questionText: "조건에 맞는 곡이 없습니다.", options: [], correctIndex: -1 };
     const song = pool[0];
 
-    // Pick Oni or Ura (Only these are allowed in filter)
+    // 오니 또는 우라 선택 (필터에서 이것들만 허용됨)
     const diffs: Difficulty[] = ['oni', 'ura'];
     const validDiffs = diffs.filter(d => {
         const c = song.courses[d];
-        // Must match level range too
+        // 레벨 범위도 일치해야 함
         if (!c) return false;
         return c.level >= filters.levelRange.min && c.level <= filters.levelRange.max;
     });
 
-    if (validDiffs.length === 0) return generateComboQuiz(); // Retry or fail
+    if (validDiffs.length === 0) return generateComboQuiz(); // 재시도 또는 실패
 
     const targetDiff = validDiffs[Math.floor(Math.random() * validDiffs.length)];
     const targetCourse = song.courses[targetDiff]!;
@@ -195,7 +195,7 @@ export function QuizGame({ mode, filters, onExit }: QuizGameProps) {
       if (pool.length === 0) return { questionText: "조건에 맞는 곡이 없습니다.", options: [], correctIndex: -1 };
       const song = pool[0];
 
-      // Pick valid diff (Oni/Ura + Level Range)
+      // 유효한 난이도 선택 (오니/우라 + 레벨 범위)
       const diffs: Difficulty[] = ['oni', 'ura'];
       const validDiffs = diffs.filter(d => {
           const c = song.courses[d];
@@ -208,7 +208,7 @@ export function QuizGame({ mode, filters, onExit }: QuizGameProps) {
       const targetDiff = validDiffs[Math.floor(Math.random() * validDiffs.length)];
       const correctLevel = song.courses[targetDiff]!.level;
 
-      // Generate wrong options
+      // 오답 옵션 생성
       const optionsNum = [correctLevel];
       while (optionsNum.length < 4) {
           const l = Math.floor(Math.random() * 10) + 1;
@@ -226,30 +226,30 @@ export function QuizGame({ mode, filters, onExit }: QuizGameProps) {
   };
 
   const generateDaniOrderQuiz = (daniList: DaniData[]): Question => {
-      if (daniList.length < 4) return generateTitleQuiz(); // Fallback
+      if (daniList.length < 4) return generateTitleQuiz(); // 대체
       
       const correctDani = daniList[Math.floor(Math.random() * daniList.length)];
       
-      // Correct order string
+      // 정답 순서 문자열
       const correctOrderStr = correctDani.songs.map(s => s.song.title).join(' → ');
 
-      // Wrong options: 
-      // 1. Same songs shuffled
-      // 2. Other dani courses
+      // 오답 옵션: 
+      // 1. 같은 노래 섞기
+      // 2. 다른 단위 코스
       const wrongOptions = new Set<string>();
       
-      // Add a shuffled version of the correct songs
+      // 정답 노래의 섞인 버전 추가
       const shuffledSongs = [...correctDani.songs].sort(() => Math.random() - 0.5);
       const shuffledStr = shuffledSongs.map(s => s.song.title).join(' → ');
       if (shuffledStr !== correctOrderStr) wrongOptions.add(shuffledStr);
 
-      // Add other random dani courses
+      // 다른 무작위 단위 코스 추가
       while (wrongOptions.size < 3) {
           const other = daniList[Math.floor(Math.random() * daniList.length)];
           if (other !== correctDani) {
               wrongOptions.add(other.songs.map(s => s.song.title).join(' → '));
           } else {
-             // If we picked the same one again, shuffle it differently
+             // 같은 것을 다시 선택한 경우, 다르게 섞기
              const reshuffle = [...correctDani.songs].sort(() => Math.random() - 0.5);
              const sStr = reshuffle.map(s => s.song.title).join(' → ');
              if (sStr !== correctOrderStr) wrongOptions.add(sStr);
@@ -274,7 +274,7 @@ export function QuizGame({ mode, filters, onExit }: QuizGameProps) {
 
       const correctAns = `${correctDani.version} ${correctDani.dan}`;
 
-      // Wrong options
+      // 오답 옵션
       const optionsArr = [correctAns];
       while (optionsArr.length < 4) {
           const other = daniList[Math.floor(Math.random() * daniList.length)];
@@ -292,10 +292,10 @@ export function QuizGame({ mode, filters, onExit }: QuizGameProps) {
   };
 
 
-  // --- Comp Logic ---
+  // --- 컴포넌트 로직 ---
 
   useEffect(() => {
-    // Start game
+    // 게임 시작
     startNewRound();
   }, [mode]);
 
@@ -314,7 +314,7 @@ export function QuizGame({ mode, filters, onExit }: QuizGameProps) {
   };
 
   const handleAnswer = (idx: number) => {
-    if (selectedOption !== null) return; // Already answered
+    if (selectedOption !== null) return; // 이미 답변함
 
     setSelectedOption(idx);
     const correct = idx === currentQuestion?.correctIndex;
@@ -324,7 +324,7 @@ export function QuizGame({ mode, filters, onExit }: QuizGameProps) {
       setScore(s => s + 100);
     }
 
-    // Auto next after delay
+    // 지연 후 자동 다음으로 이동
     setTimeout(() => {
       if (round >= QUESTIONS_PER_ROUND) {
         setIsGameOver(true);

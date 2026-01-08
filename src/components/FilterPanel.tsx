@@ -11,7 +11,7 @@ const DIFFICULTIES: Difficulty[] = ['easy', 'normal', 'hard', 'oni', 'ura'];
 
 export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange }) => {
     const allGenres = getAllGenres();
-    const [isLevelOpen, setIsLevelOpen] = React.useState(true); // Default open to show selection
+    const [isLevelOpen, setIsLevelOpen] = React.useState(true); // 선택 항목을 표시하기 위해 기본적으로 열림
 
     const handleGenreChange = (genre: string) => {
         const newGenres = filters.genres.includes(genre)
@@ -25,23 +25,23 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChang
         const current = filters.difficulties || [];
 
         if (['oni', 'ura'].includes(diff)) {
-            // Check if we are currently in "Oni/Ura mode" (only oni or ura selected)
+            // 현재 "오니/우라 모드"인지 확인 (오니 또는 우라만 선택됨)
             const isMultiMode = current.every(d => ['oni', 'ura'].includes(d));
 
             if (isMultiMode) {
                 if (current.includes(diff)) {
-                    // Toggle off, but prevent empty if desired (optional, currently allowing empty)
+                    // 끄기 전환, 원할 경우 빈 상태 방지 (선택 사항, 현재는 빈 상태 허용)
                     newDifficulties = current.filter(d => d !== diff);
                 } else {
-                    // Add
+                    // 추가
                     newDifficulties = [...current, diff];
                 }
             } else {
-                // Switch from other mode to this
+                // 다른 모드에서 이 모드로 전환
                 newDifficulties = [diff];
             }
         } else {
-            // Strict single select for others
+            // 다른 항목에 대해서는 엄격한 단일 선택
             newDifficulties = [diff];
         }
 

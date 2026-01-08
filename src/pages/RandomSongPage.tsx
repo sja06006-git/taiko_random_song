@@ -20,7 +20,7 @@ export function RandomSongPage() {
   const [selectedSong, setSelectedSong] = useState<any | null>(null);
   const [displayDifficulty, setDisplayDifficulty] = useState<any>('oni');
 
-  // Derive filtered songs
+  // 필터링된 노래 도출
   const filteredSongs = useMemo(() => {
     return filterSongs(filters);
   }, [filters]);
@@ -28,18 +28,18 @@ export function RandomSongPage() {
   const handlePick = () => {
     const song = pickRandomSong(filteredSongs);
     if (song) {
-      // Determine which of the selected difficulties is valid for this song
+      // 선택된 난이도 중 이 노래에 유효한 난이도 결정
       const validDifficulties = filters.difficulties.filter(diff => {
         const course = song.courses[diff];
         if (!course) return false;
-        // Also check if this specific difficulty meets level requirements
+        // 이 특정 난이도가 레벨 요구사항을 충족하는지도 확인
         if (filters.levels.length > 0) {
           return filters.levels.includes(course.level);
         }
         return true;
       });
 
-      // Randomly pick one valid difficulty to display
+      // 표시할 유효한 난이도 중 하나를 무작위로 선택
       if (validDifficulties.length > 0) {
         const randomDiff = validDifficulties[Math.floor(Math.random() * validDifficulties.length)];
         setDisplayDifficulty(randomDiff);
